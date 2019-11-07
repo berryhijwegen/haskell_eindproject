@@ -1,8 +1,8 @@
 module Main where
 
-import Lib2
+import SimulationModule
 
 main :: IO ()
 main = do
-    initialState <- generatePlatform
+    initialState <- generatePlatform 5 5
     iterate stepForward initialState
