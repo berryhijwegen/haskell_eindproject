@@ -29,6 +29,8 @@ getCreaturePositions (Simulation _creatures _ _) = map getCreaturePos _creatures
 getGridSize :: Simulation -> Int
 getGridSize (Simulation _ _ _gridsize) = _gridsize  
 
+deleteFood :: Simulation -> Pos -> Simulation
+deleteFood s f = s {_foods = delete f $ getFoodPositions s}
 
 data Creature = Creature 
   { _hp             :: Int
@@ -39,14 +41,18 @@ data Creature = Creature
 getCreaturePos :: Creature -> Pos
 getCreaturePos (Creature _ _pos) = _pos
 
+getHp :: Creature -> Int
+getHp (Creature _hp _) = _hp
 
+addHp :: Creature -> Int -> Creature
+addHp c v = c {_hp = (getHp c) + v}
 
 -- | Generates row of s 0's 
 generateRow :: Simulation -> Int -> [Int]
 generateRow s row_num = [ 
-    if (row_num,i) `elem` getFoodPositions s 
+    if (i,row_num) `elem` getFoodPositions s 
       then 2 
-    else if (row_num,i) `elem` getCreaturePositions s 
+    else if (i,row_num) `elem` getCreaturePositions s 
       then 1 
     else 0 
     | i <- [1..getGridSize s]
@@ -66,8 +72,12 @@ printRow xs = unwords $ listToString xs
 
 -- | Print given grid
 printGrid :: [[Int]] -> IO ()
-printGrid = mapM_ (putStrLn . printRow)
+printGrid grid = do 
+  mapM_ (putStrLn . printRow) grid
+  printBorder $ length grid
 
+printBorder :: Int -> IO ()
+printBorder l = putStrLn $ concat (replicate l "- ")
 
 printSimulation :: Simulation -> IO ()
 printSimulation s = printGrid $ generateGrid s
@@ -102,22 +112,22 @@ getDistance p1 p2 = abs (fst p1 - fst p2) + abs (snd p1 - snd p2)
 
 -- | Move a creature to nearest food, replace in Simulation
 moveToClosestFood :: Simulation -> Creature -> Simulation
-moveToClosestFood s c = s {_creatures = replace c (moveCreature c $ decideDirection (findNearestFood s c) (getCreaturePos c)) $ getCreatures s}
+moveToClosestFood s c = s {_creatures = replace c (moveCreature c $ decideDirection (getCreaturePos c) (findNearestFood s c) ) $ getCreatures s}
 
 -- | Decide a direction (Up',Down',Right',Left') based on current and target position
 decideDirection :: Pos -> Pos -> Direction 
-decideDirection curr_pos target_pos
-    | fst curr_pos /= fst target_pos =
-      if fst curr_pos < fst target_pos then Up' else Down'
-    | snd curr_pos < snd target_pos = Right'
+decideDirection curr_pos target_pos -- (8,1) (4,2)
+    | snd curr_pos /= snd target_pos =
+      if snd curr_pos < snd target_pos then Up' else Down'
+    | fst curr_pos < fst target_pos = Right'
     | otherwise = Left'
 
 -- | Replace the position of a creature based on the given Direction
 moveCreature :: Creature -> Direction -> Creature
 moveCreature c Up' = c { _pos = changePos (getCreaturePos c) 1 1};
 moveCreature c Down' = c { _pos = changePos (getCreaturePos c) 1 (-1)};
-moveCreature c Left' = c { _pos = changePos (getCreaturePos c) 0 1};
-moveCreature c Right' = c { _pos = changePos (getCreaturePos c) 0 (-1)};
+moveCreature c Left' = c { _pos = changePos (getCreaturePos c) 0 (-1)};
+moveCreature c Right' = c { _pos = changePos (getCreaturePos c) 0 1};
 
 -- | Alter the position on the given axis with a given value
 changePos :: Pos -> Int -> Int -> Pos
@@ -131,7 +141,27 @@ replace :: Eq a =>
         -> [a] -- ^ Output list
 replace x y = map (\z -> if z == x then y else z)
 
-
--- | do Step forward for each creature
 stepForward :: Simulation -> Simulation
-stepForward s = foldl moveToClosestFood s $ getCreatures s
+stepForward s = checkCollisions $ setOneStep s
+  
+-- | Check for each creature if it collided with food
+checkCollisions :: Simulation -> Simulation
+checkCollisions s = foldl checkCreatureFoodCollision s $ getCreatures s
+
+-- | do one step in grid for each creature
+setOneStep :: Simulation -> Simulation
+setOneStep s = foldl moveToClosestFood s $ getCreatures s
+
+-- | Check if creature is on food position
+checkCreatureFoodCollision :: Simulation -> Creature -> Simulation
+checkCreatureFoodCollision s c = if getCreaturePos c `elem` getFoodPositions s 
+  then 
+    handleCreatureFoodCollision s c
+  else
+    s
+
+handleCreatureFoodCollision :: Simulation -> Creature -> Simulation
+handleCreatureFoodCollision s c = deleteFood (s {_creatures = replace c (addHp c 25) $ getCreatures s}) $ getCreaturePos c
+
+
+main = mapM_ printSimulation (take 31 (iterate stepForward $ generatePlatform 5 5 10))
