@@ -24,4 +24,4 @@ main = do
     grid_size <- readUntilNumeric
     putStrLn "Fill in a number to generate a pseudo-random simulation. Note: You will be prompted to type until a valid number is given."    
     seed <- readUntilNumeric
-    mapM_ printSimulation $ take 100 $ iterate stepForward $ generatePlatform (read number_of_creatures) (read number_of_foods) (read grid_size) (read seed)
+    mapM_ printSimulation $ take 1000 $ iterate stepForward $ generatePlatform (read number_of_creatures) (read number_of_foods) (read grid_size) (read seed)
