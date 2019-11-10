@@ -16,20 +16,20 @@ For example, a grid with 5 creatures, 5 food items and grid size of 5 could be:
 | 1 | 0 | 1 | 0 | 0 |
 | 0 | 2 | 0 | 2 | 0 |
 
-0 = Nothing
-1 = Creature
-2 = Food
+0 = Nothing  
+1 = Creature  
+2 = Food  
 
 After the grid has been generated each step will be printed out to the console. This will contain info of all creatures and the actual grid.
 
 ## FAQ
-**When does the simulation end?**
+**When does the simulation end?**  
 A simulation will end when all creatures die or all food items are gone.
 
-**How do creatures die?**
+**How do creatures die?**  
 Creatures die when they don't eat. Each step in the simulation their hp decreases with 10 hp.
 
-**How do creatures not die?**
+**How do creatures not die?**  
 Creatures survive by eating. When they eat they regain 25 hp.
 
 ## Running the application
