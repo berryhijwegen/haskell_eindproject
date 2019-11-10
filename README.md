@@ -9,12 +9,14 @@ When executing you will be prompted to specify some numbers which will be used i
 
 For example, a grid with 5 creatures, 5 food items and grid size of 5 could be:
 
-| 1 | 0 | 0 | 0 | 2 |
+||||||
 |---|---|---|---|---|
 | 0 | 2 | 1 | 0 | 1 |
 | 0 | 0 | 0 | 0 | 2 |
 | 1 | 0 | 1 | 0 | 0 |
 | 0 | 2 | 0 | 2 | 0 |
+| 1 | 0 | 0 | 0 | 2 |
+||||||
 
 0 = Nothing  
 1 = Creature  
